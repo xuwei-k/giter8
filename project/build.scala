@@ -2,17 +2,15 @@ import sbt._
 
 object Builds extends sbt.Build {
   import Keys._
-  import ls.Plugin.{lsSettings,LsKeys}
-  import sbtbuildinfo.Plugin._
 
-  val g8version = "0.4.5"
+  val g8version = "0.4.6-SNAPSHOT"
 
-  lazy val buildSettings = Defaults.defaultSettings ++ lsSettings ++ Seq(
+  lazy val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "net.databinder.giter8",
     version := g8version,
-    scalaVersion := "2.9.1",
+    scalaVersion := "2.9.2",
     libraryDependencies ++= Seq(
-      "org.clapper" %% "scalasti" % "0.5.5"),
+      "org.clapper" % "scalasti_2.9.1" % "0.5.5"),
     publishArtifact in (Compile, packageBin) := true,
     homepage :=
       Some(url("https://github.com/n8han/giter8")),
@@ -35,36 +33,32 @@ object Builds extends sbt.Build {
         </developer>
       </developers>)
   )
-  
+
   // posterous title needs to be giter8, so both app and root are named giter8
   lazy val root = Project("root", file("."),
     settings = buildSettings ++ Seq(
-      name := "giter8",
-      LsKeys.skipWrite := true
+      name := "giter8"
     )) aggregate(plugin, app, lib)
 
   lazy val app = Project("app", file("app"),
-    settings = buildSettings ++ conscript.Harness.conscriptSettings ++ buildInfoSettings ++ Seq(
+    settings = buildSettings ++ Seq(
       description :=
         "Command line tool to apply templates defined on github",
       name := "giter8",
       libraryDependencies +=
-        "net.databinder" %% "dispatch-lift-json" % "0.8.5",
-      sourceGenerators in Compile <+= buildInfo,
-      buildInfoKeys := Seq[Scoped](name, version, scalaVersion, sbtVersion),
-      buildInfoPackage := "giter8"
+        "net.databinder" % "dispatch-lift-json_2.9.1" % "0.8.5"
     )) dependsOn (lib)
 
   lazy val plugin = Project("giter8-plugin", file("plugin"),
     settings = buildSettings ++ Seq(
       description :=
-        "sbt 0.11 plugin for testing giter8 templates",
+        "sbt 0.12 plugin for testing giter8 templates",
       sbtPlugin := true,
       resolvers += Resolver.url("Typesafe repository", new java.net.URL("http://typesafe.artifactoryonline.com/typesafe/ivy-releases/"))(Resolver.defaultIvyPatterns),
-      libraryDependencies <++= (sbtDependency, sbtVersion) { (sd, sv) =>
-        Seq(sd,
-            "org.scala-tools.sbt" %% "scripted-plugin" % sv
-            )
+      libraryDependencies <++= (sbtVersion) { (sv) =>
+        Seq(
+          "org.scala-sbt" % "scripted-plugin" % sv
+        )
       }
     )) dependsOn (lib)
 
@@ -72,8 +66,10 @@ object Builds extends sbt.Build {
     settings = buildSettings ++ Seq(
       description :=
         "shared library for app and plugin",
-      libraryDependencies ++= Seq(
-        "me.lessis" %% "ls" % "0.1.2-RC2"
-      )
+      libraryDependencies <++= (sbtDependency){(sd) =>
+        Seq(sd,
+          "me.lessis" % "ls_2.9.1" % "0.1.2-RC2"
+        )
+      }
     ))
 }

@@ -63,7 +63,7 @@ class Giter8 extends xsbti.AppMain
                 |        Resolves a template within a given branch
                 |    --paramname=paramvalue
                 |        Set given parameter value and bypass interaction.
-                |    
+                |
                 |
                 |Apply template and interactively fulfill parameters.
                 |    g8 n8han/giter8
@@ -76,7 +76,7 @@ class Giter8 extends xsbti.AppMain
                 |
                 |Acquire Github authorization
                 |    g8 -a login:password
-                |""".stripMargin format (BuildInfo.version)
+                |""".stripMargin // format (BuildInfo.version)
 
 }
 
