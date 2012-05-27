@@ -48,6 +48,12 @@ object Scripted {
     }
   }
 
+  lazy val defaultLaunchOps = {
+    import scala.collection.JavaConverters._
+    val args = Seq("-Xmx","-Xms")
+    management.ManagementFactory.getRuntimeMXBean().getInputArguments().asScala.filter(a => args.contains(a) || a.startsWith("-XX")).toSeq
+  }
+
   lazy val scriptedSettings: Seq[sbt.Project.Setting[_]] = Seq(
     ivyConfigurations += scriptedConf,
     scriptedSbt <<= (appConfiguration)(_.provider.id.version),
@@ -60,7 +66,7 @@ object Scripted {
     scriptedTests <<= scriptedTestsTask,
     scriptedRun <<= scriptedRunTask,
     scriptedDependencies <<= (compile in Test, publishLocal) map { (analysis, pub) => Unit },
-    scriptedLaunchOpts := Seq(),
+    scriptedLaunchOpts := defaultLaunchOps,
     scripted <<= scriptedTask
   )
 }
