@@ -49,7 +49,7 @@ object Plugin extends sbt.Plugin {
       
       // copy test script or generate one
       val script = new File(out, "test")
-      if (ts.exists) IO.copyFile(ts, script)
+      if (ts.isFile) IO.copyFile(ts, script)
       else IO.write(script, """>test""")
       retval :+ script
     },
