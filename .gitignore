@@ -1,6 +1,9 @@
-lib_managed/
-project/boot/
-project/build/target/
-target/
-src_managed/
-project/plugins/project/
+target
+project/target
+project/project/target/
+plugin/target
+library/target
+app/target
+*.swp
+*.class
+*.jar
