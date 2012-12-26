@@ -49,6 +49,7 @@ object Plugin extends sbt.Plugin {
       
       // copy test script or generate one
       val script = new File(out, "test")
+      if (script.isDirectory) throw new Error("""There is the "test" directory. Can't write test script file. please rename""")
       if (ts.isFile) IO.copyFile(ts, script)
       else IO.write(script, """>test""")
       retval :+ script
