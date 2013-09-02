@@ -25,9 +25,10 @@ object Scripted {
   val scriptedClasspath = TaskKey[PathFinder]("_g8-scripted-classpath")
   val scriptedTests = TaskKey[AnyRef]("_g8-scripted-tests")
   val scriptedRun = TaskKey[Method]("_g8-scripted-run")
+  val scriptedLaunchOpts = SettingKey[Seq[String]]("_g8_scripted-launch-opts", "options to pass to jvm launching scripted tasks")
   val scriptedDependencies = TaskKey[Unit]("_g8-scripted-dependencies")
-  val scripted = InputKey[Unit]("_g8-scripted")   
-  
+  val scripted = InputKey[Unit]("_g8-scripted")
+
   def scriptedTestsTask: Initialize[Task[AnyRef]] = (scriptedClasspath, scalaInstance) map {
     (classpath, scala) =>
     val loader = ClasspathUtilities.toLoader(classpath, scala.loader)
@@ -35,24 +36,29 @@ object Scripted {
   }
 
   def scriptedRunTask: Initialize[Task[Method]] = (scriptedTests) map {
-    (m) =>
-    m.getClass.getMethod("run", classOf[File], classOf[Boolean], classOf[String], classOf[String], classOf[String], classOf[Array[String]], classOf[File]) 
+    _.getClass.getMethod("run", classOf[File], classOf[Boolean], classOf[Array[String]], classOf[File], classOf[Array[String]])
   }
-  
-  def scriptedTask: Initialize[InputTask[Unit]] = InputTask(_ => complete.Parsers.spaceDelimited("<arg>")) { result =>
-    (scriptedDependencies, scriptedTests, scriptedRun, sbtTestDirectory, scriptedBufferLog, scriptedSbt, scriptedScalas, sbtLauncher, result) map {
-      (deps, m, r, testdir, bufferlog, version, scriptedScalas, launcher, args) =>
-      try { r.invoke(m, testdir, bufferlog: java.lang.Boolean, version.toString, scriptedScalas.build, scriptedScalas.versions, args.toArray, launcher) }
-      catch { case e: java.lang.reflect.InvocationTargetException => throw e.getCause }
+
+  def scriptedTask: Initialize[InputTask[Unit]] = Def.inputTask {
+    val args = Def.spaceDelimited().parsed
+    val prereq: Unit = scriptedDependencies.value
+    try {
+      scriptedRun.value.invoke(
+        scriptedTests.value, sbtTestDirectory.value, scriptedBufferLog.value: java.lang.Boolean,
+        args.toArray, sbtLauncher.value, scriptedLaunchOpts.value.toArray)
     }
-  }   
-  
+    catch { case e: java.lang.reflect.InvocationTargetException => throw e.getCause }
+  }
+
+  lazy val defaultLaunchOps = sys.process.javaVmArguments.filter(
+    a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
+  )
+
   lazy val scriptedSettings: Seq[sbt.Project.Setting[_]] = Seq(
     ivyConfigurations += scriptedConf,
-    resolvers += Resolver.url("Typesafe repository", new java.net.URL("http://typesafe.artifactoryonline.com/typesafe/ivy-releases/"))(Resolver.defaultIvyPatterns),
     scriptedSbt <<= (appConfiguration)(_.provider.id.version),
     scriptedScalas <<= (scalaVersion) { (scala) => ScriptedScalas(scala, scala) },
-    libraryDependencies <<= (libraryDependencies, scriptedScalas, scriptedSbt) {(deps, scalas, version) => deps :+ "org.scala-sbt" % ("scripted-sbt_" + scalas.build) % version % scriptedConf.toString },
+    libraryDependencies <<= (libraryDependencies, scriptedSbt) {(deps, version) => deps :+ "org.scala-sbt" % "scripted-sbt" % version % scriptedConf.toString },
     sbtLauncher <<= (appConfiguration)(app => IO.classLocationFile(app.provider.scalaProvider.launcher.getClass)),
     sbtTestDirectory <<= sourceDirectory / "sbt-test",
     scriptedBufferLog := true,
@@ -60,6 +66,7 @@ object Scripted {
     scriptedTests <<= scriptedTestsTask,
     scriptedRun <<= scriptedRunTask,
     scriptedDependencies <<= (compile in Test, publishLocal) map { (analysis, pub) => Unit },
-    scripted <<= scriptedTask     
+    scriptedLaunchOpts := defaultLaunchOps,
+    scripted <<= scriptedTask
   )
 }
