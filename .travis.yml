@@ -1,5 +1,4 @@
 language: scala
 sudo: false
 script:
-  - sbt test giter8-plugin/scripted
-
+  - sbt test giter8-plugin/scripted giter8-scaffold/scripted

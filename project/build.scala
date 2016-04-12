@@ -66,26 +66,29 @@ object Builds extends sbt.Build {
       resolvers += typesafeRepo
     )) dependsOn (lib)
 
+  lazy val scriptedPluginSettings = ScriptedPlugin.scriptedSettings ++ Seq(
+    ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
+      a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)
+    ),
+    ScriptedPlugin.scriptedBufferLog := false,
+    ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+    ScriptedPlugin.scripted <<= ScriptedPlugin.scripted dependsOn(publishLocal in lib)
+  )
+
   lazy val scaffold = Project("giter8-scaffold", file("scaffold"),
-    settings = buildSettings ++ Seq(
+    settings = buildSettings ++ scriptedPluginSettings ++ Seq(
       description := "sbt plugin for scaffolding giter8 templates",
       sbtPlugin := true
     )) dependsOn (lib)
 
   lazy val plugin: Project = Project("giter8-plugin", file("plugin"),
-    settings = buildSettings ++ ScriptedPlugin.scriptedSettings ++ Seq(
+    settings = buildSettings ++ scriptedPluginSettings ++ Seq(
       description := "sbt plugin for testing giter8 templates",
       sbtPlugin := true,
       resolvers ++= Seq(
         Resolver.url("Typesafe repository", url("http://typesafe.artifactoryonline.com/typesafe/ivy-releases/"))(Resolver.defaultIvyPatterns),
         typesafeRepo
       ),
-      ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
-        a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)
-      ),
-      ScriptedPlugin.scriptedBufferLog := false,
-      ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
-      ScriptedPlugin.scripted <<= ScriptedPlugin.scripted dependsOn(publishLocal in lib),
       libraryDependencies <+= sbtVersion("org.scala-sbt" % "scripted-plugin" % _)
     )) dependsOn (lib)
 
