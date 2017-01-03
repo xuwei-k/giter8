@@ -14,6 +14,11 @@ lazy val root = (project in file(".")).
       organizationName := "foundweekends",
       organizationHomepage := Some(url("http://foundweekends.org/")),
       scalacOptions ++= Seq("-language:_", "-deprecation", "-Xlint", "-Xfuture"),
+      scalacOptions in (Compile, doc) ++= {
+        val base = (baseDirectory in LocalRootProject).value.getAbsolutePath
+        val hash = sys.process.Process("git rev-parse HEAD").lines_!.head
+        Seq("-sourcepath", base, "-doc-source-url", "https://github.com/foundweekends/github/tree/" + hash + "€{FILE_PATH}.scala")
+      },
       publishArtifact in (Compile, packageBin) := true,
       homepage := Some(url("http://www.foundweekends.org/giter8/")),
       publishMavenStyle := true,
