@@ -94,7 +94,13 @@ lazy val plugin = (project in file("plugin"))
     scripted := ScriptedPlugin.scripted
       .dependsOn(publishLocal in lib)
       .evaluated,
-    libraryDependencies += ("org.scala-sbt" % "scripted-plugin" % sbtVersion.value),
+    libraryDependencies += {
+      if((sbtVersion in pluginCrossBuild).value.startsWith("0.13")) {
+        "org.scala-sbt" % "scripted-plugin" % (sbtVersion in pluginCrossBuild).value
+      } else {
+        "org.scala-sbt" %% "scripted-plugin" % (sbtVersion in pluginCrossBuild).value
+      }
+    },
     test in Test := {
       scripted.toTask("").value
     }
