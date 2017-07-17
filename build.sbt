@@ -54,26 +54,44 @@ lazy val app = (project in file("app"))
     buildInfoPackage := "giter8"
   )
 
+lazy val scriptedPluginSettings = Seq[SettingsDefinition](
+  sbtPlugin := true,
+  crossScalaVersions := List(scala210),
+  scriptedSettings.filterNot(_.key.key.label == libraryDependencies.key.label),
+  scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
+    a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)
+  ),
+  scriptedBufferLog := false,
+  scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+  libraryDependencies ++= {
+    CrossVersion.binarySbtVersion(scriptedSbt.value) match {
+      case "0.13" =>
+        Seq(
+          "org.scala-sbt" % "scripted-sbt" % scriptedSbt.value % scriptedConf.toString,
+          "org.scala-sbt" % "sbt-launch" % scriptedSbt.value % scriptedLaunchConf.toString
+        )
+      case _ =>
+        Seq(
+          "org.scala-sbt" %% "scripted-sbt" % scriptedSbt.value % scriptedConf.toString,
+          "org.scala-sbt" % "sbt-launch" % scriptedSbt.value % scriptedLaunchConf.toString
+        )
+    }
+  },
+  test in Test := {
+    scripted.toTask("").value
+  }
+).flatMap(_.settings)
+
 lazy val scaffold = (project in file("scaffold"))
   .enablePlugins(BintrayPublish)
   .dependsOn(lib)
   .settings(
     name := "sbt-giter8-scaffold",
     description := "sbt plugin for scaffolding giter8 templates",
-    sbtPlugin := true,
-    crossScalaVersions := List(scala210),
-    scriptedSettings,
-    scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
-      a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)
-    ),
-    scriptedBufferLog := false,
-    scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+    scriptedPluginSettings,
     scripted := ScriptedPlugin.scripted
       .dependsOn(publishLocal in lib)
-      .evaluated,
-    test in Test := {
-      scripted.toTask("").value
-    }
+      .evaluated
   )
 
 lazy val plugin = (project in file("plugin"))
@@ -81,22 +99,19 @@ lazy val plugin = (project in file("plugin"))
   .dependsOn(lib)
   .settings(
     name := "sbt-giter8",
-    scriptedSettings,
+    scriptedPluginSettings,
     description := "sbt plugin for testing giter8 templates",
-    sbtPlugin := true,
-    crossScalaVersions := List(scala210),
     resolvers += Resolver.typesafeIvyRepo("releases"),
-    scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
-      a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)
-    ),
-    scriptedBufferLog := false,
-    scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
     scripted := ScriptedPlugin.scripted
       .dependsOn(publishLocal in lib)
       .evaluated,
-    libraryDependencies += ("org.scala-sbt" % "scripted-plugin" % sbtVersion.value),
-    test in Test := {
-      scripted.toTask("").value
+    libraryDependencies += {
+      CrossVersion.binarySbtVersion(scriptedSbt.value) match {
+        case "0.13" =>
+          "org.scala-sbt" % "scripted-plugin" % scriptedSbt.value
+        case _ =>
+          "org.scala-sbt" %% "scripted-plugin" % scriptedSbt.value
+      }
     }
   )
 
