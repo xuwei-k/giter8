@@ -39,7 +39,7 @@ case class Config(
     forceOverwrite: Boolean   = false,
     directory: Option[String] = None,
     version: Option[String]   = None,
-    mode: Mode                = Launch,
+    mode: Mode                = Run,
     out: Option[String]       = None
 )
 
