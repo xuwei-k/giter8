@@ -5,7 +5,7 @@ val g8version = "0.11.0-SNAPSHOT"
 
 // posterous title needs to be giter8, so both app and root are named giter8
 lazy val root = (project in file("."))
-  .enablePlugins(TravisSitePlugin, NoPublish)
+  .enablePlugins(NoPublish)
   .aggregate(app, lib, scaffold, plugin)
   .settings(
     inThisBuild(
