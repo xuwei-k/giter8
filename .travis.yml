@@ -11,7 +11,7 @@ language: scala
 matrix:
   include:
   - dist: precise
-    jdk: openjdk6
+    jdk: openjdk7
     env: SBT_VERSION=0.13.17
     # https://github.com/travis-ci/travis-ci/issues/5227
     addons:
