@@ -93,7 +93,7 @@ final class MavenTest extends FlatSpec with Matchers with EitherValues {
           <doc>
             <str name="a">scalatest_2.12</str>
             <str name="g">org.scalatest</str>
-            <str name="id">org.scalatest:scalatest_2.12:3.1.0-SNAP6</str>
+            <str name="id">org.scalatest:scalatest_2.12:3.1.1-SNAP6</str>
             <str name="v">3.1.0-SNAP6</str>
           </doc>
           <doc>
