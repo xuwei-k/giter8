@@ -33,15 +33,16 @@ object GitRepository {
     def privateUrl: String = s"git@github.com:$user/$repo.g8.git"
   }
 
-  def fromString(string: String): Either[String, GitRepository] = string match {
-    case Matches.Local(_)           => Right(Local(toFile(new URI(string))))
-    case Matches.NativeUrl(url)     => Right(Remote(url))
-    case Matches.HttpsUrl(url)      => Right(Remote(url))
-    case Matches.HttpUrl(url)       => Right(Remote(url))
-    case Matches.SshUrl(url)        => Right(Remote(url))
-    case Matches.GitHub(user, repo) => Right(GitHub(user, repo))
-    case _                          => Left(s"unknown repository type: $string")
-  }
+  def fromString(string: String): Either[String, GitRepository] =
+    string match {
+      case Matches.Local(_)           => Right(Local(toFile(new URI(string))))
+      case Matches.NativeUrl(url)     => Right(Remote(url))
+      case Matches.HttpsUrl(url)      => Right(Remote(url))
+      case Matches.HttpUrl(url)       => Right(Remote(url))
+      case Matches.SshUrl(url)        => Right(Remote(url))
+      case Matches.GitHub(user, repo) => Right(GitHub(user, repo))
+      case _                          => Left(s"unknown repository type: $string")
+    }
 
   object Matches {
     val GitHub: Regex    = """^([^\s/]+)/([^\s/]+?)(?:\.g8)?$""".r

@@ -30,50 +30,53 @@ import scala.collection.JavaConverters._
 class Git(gitInteractor: GitInteractor) {
   import Git._
 
-  def clone(repository: GitRepository, ref: Option[Ref], destination: File): Try[Unit] = repository match {
-    case remote: Remote => cloneWithGivenRefOrDefaultBranch(remote.url, ref, destination)
-    case local: Local =>
-      ref match {
-        // for file:// repositories with no named branch, just do a file copy (assume current branch)
-        case None    => copy(local.path, destination)
-        case Some(_) => cloneWithGivenRefOrDefaultBranch(local.path.toString, ref, destination)
-      }
-    case github: GitHub =>
-      cloneWithGivenRefOrDefaultBranch(github.publicUrl, ref, destination) recoverWith {
-        case _: TransportError =>
-          cleanDir(destination)
-          cloneWithGivenRefOrDefaultBranch(github.privateUrl, ref, destination)
-      }
-  }
+  def clone(repository: GitRepository, ref: Option[Ref], destination: File): Try[Unit] =
+    repository match {
+      case remote: Remote => cloneWithGivenRefOrDefaultBranch(remote.url, ref, destination)
+      case local: Local =>
+        ref match {
+          // for file:// repositories with no named branch, just do a file copy (assume current branch)
+          case None    => copy(local.path, destination)
+          case Some(_) => cloneWithGivenRefOrDefaultBranch(local.path.toString, ref, destination)
+        }
+      case github: GitHub =>
+        cloneWithGivenRefOrDefaultBranch(github.publicUrl, ref, destination) recoverWith {
+          case _: TransportError =>
+            cleanDir(destination)
+            cloneWithGivenRefOrDefaultBranch(github.privateUrl, ref, destination)
+        }
+    }
 
-  private def cloneWithGivenRefOrDefaultBranch(url: String, ref: Option[Ref], dest: File): Try[Unit] = ref match {
-    case None =>
-      gitInteractor.cloneRepository(url, dest) flatMap { _ =>
-        gitInteractor.getDefaultBranch(dest) flatMap { branch => gitInteractor.checkoutBranch(dest, branch) }
-      }
-    case Some(Ref.Branch(br)) =>
-      gitInteractor.getRemoteBranches(url) flatMap { remoteBranches =>
-        if (!remoteBranches.contains(br)) Failure(NoBranchError(br))
-        else
-          gitInteractor.cloneRepository(url, dest) flatMap { _ => gitInteractor.checkoutBranch(dest, br) }
-      }
-    case Some(Ref.Tag(t)) =>
-      gitInteractor.getRemoteTags(url) flatMap { remoteTags =>
-        if (!remoteTags.contains(t)) Failure(NoTagError(t))
-        else
-          gitInteractor.cloneRepository(url, dest) flatMap { _ => gitInteractor.checkoutTag(dest, t) }
-      }
-  }
+  private def cloneWithGivenRefOrDefaultBranch(url: String, ref: Option[Ref], dest: File): Try[Unit] =
+    ref match {
+      case None =>
+        gitInteractor.cloneRepository(url, dest) flatMap { _ =>
+          gitInteractor.getDefaultBranch(dest) flatMap { branch => gitInteractor.checkoutBranch(dest, branch) }
+        }
+      case Some(Ref.Branch(br)) =>
+        gitInteractor.getRemoteBranches(url) flatMap { remoteBranches =>
+          if (!remoteBranches.contains(br)) Failure(NoBranchError(br))
+          else
+            gitInteractor.cloneRepository(url, dest) flatMap { _ => gitInteractor.checkoutBranch(dest, br) }
+        }
+      case Some(Ref.Tag(t)) =>
+        gitInteractor.getRemoteTags(url) flatMap { remoteTags =>
+          if (!remoteTags.contains(t)) Failure(NoTagError(t))
+          else
+            gitInteractor.cloneRepository(url, dest) flatMap { _ => gitInteractor.checkoutTag(dest, t) }
+        }
+    }
 
   // Protected for testing: see GitTest.scala
   protected def cleanDir(dir: File): Unit = dir.listFiles().foreach(_.delete())
 
   // Protected for testing: see GitTest.scala
-  protected def copy(from: File, to: File): Try[Unit] = Try {
-    if (!from.isDirectory) throw CloneError("Not a readable directory: " + from.getAbsolutePath)
-    FileUtils.copyDirectory(from, to)
-    copyExecutableAttribute(from, to)
-  }
+  protected def copy(from: File, to: File): Try[Unit] =
+    Try {
+      if (!from.isDirectory) throw CloneError("Not a readable directory: " + from.getAbsolutePath)
+      FileUtils.copyDirectory(from, to)
+      copyExecutableAttribute(from, to)
+    }
 
   private def copyExecutableAttribute(fromDir: File, toDir: File): Unit = {
     val files       = FileUtils.iterateFiles(fromDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).asScala

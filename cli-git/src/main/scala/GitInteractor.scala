@@ -44,15 +44,16 @@ class JGitInteractor(knownHosts: Option[String]) extends GitInteractor {
   CredentialsProvider.setDefault(ConsoleCredentialsProvider)
   SshSessionFactory.setInstance(new SshAgentSessionFactory(knownHosts))
 
-  override def cloneRepository(url: String, dest: File): Try[Unit] = Try {
-    JGit
-      .cloneRepository()
-      .setURI(url)
-      .setDirectory(dest)
-      .setCredentialsProvider(ConsoleCredentialsProvider)
-      .call()
-      .close()
-  }
+  override def cloneRepository(url: String, dest: File): Try[Unit] =
+    Try {
+      JGit
+        .cloneRepository()
+        .setURI(url)
+        .setDirectory(dest)
+        .setCredentialsProvider(ConsoleCredentialsProvider)
+        .call()
+        .close()
+    }
 
   override def getRemoteBranches(url: String): Try[Seq[String]] = {
     Try(JGit.lsRemoteRepository().setRemote(url).setHeads(true).setTags(false).call()) map { refs =>
@@ -70,17 +71,18 @@ class JGitInteractor(knownHosts: Option[String]) extends GitInteractor {
     }
   }
 
-  override def getDefaultBranch(repository: File): Try[String] = Try {
-    val git = JGit.open(repository)
-    try {
-      val refs = git.getRepository.getAllRefs.asScala
-      // We assume we have freshly cloned repository with origin set up to clone URL
-      // Symref HEAD will point to default remote branch.
-      val symRefs = refs.filter(_._2.isSymbolic)
-      val head    = symRefs("HEAD")
-      head.getTarget.getName.stripPrefix("refs/heads/")
-    } finally git.close()
-  }
+  override def getDefaultBranch(repository: File): Try[String] =
+    Try {
+      val git = JGit.open(repository)
+      try {
+        val refs = git.getRepository.getAllRefs.asScala
+        // We assume we have freshly cloned repository with origin set up to clone URL
+        // Symref HEAD will point to default remote branch.
+        val symRefs = refs.filter(_._2.isSymbolic)
+        val head    = symRefs("HEAD")
+        head.getTarget.getName.stripPrefix("refs/heads/")
+      } finally git.close()
+    }
 
   override def checkoutBranch(repository: File, branch: String): Try[Unit] = {
     val git = JGit.open(repository)
@@ -93,8 +95,9 @@ class JGitInteractor(knownHosts: Option[String]) extends GitInteractor {
     }
   }
 
-  override def checkoutTag(repository: File, tag: String): Try[Unit] = Try {
-    val git = JGit.open(repository)
-    Try(git.checkout().setName(tag).call()).map(_ => git.close())
-  }
+  override def checkoutTag(repository: File, tag: String): Try[Unit] =
+    Try {
+      val git = JGit.open(repository)
+      Try(git.checkout().setName(tag).call()).map(_ => git.close())
+    }
 }

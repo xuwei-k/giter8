@@ -70,8 +70,9 @@ trait IntegrationTestHelpers {
     file.getAbsolutePath.stripPrefix(baseDirectory.getAbsolutePath)
   }
 
-  private def getFilesRecursively(file: File): Seq[File] = file match {
-    case dir if file.isDirectory => dir.listFiles.flatMap(getFilesRecursively)
-    case _                       => Seq(file)
-  }
+  private def getFilesRecursively(file: File): Seq[File] =
+    file match {
+      case dir if file.isDirectory => dir.listFiles.flatMap(getFilesRecursively)
+      case _                       => Seq(file)
+    }
 }

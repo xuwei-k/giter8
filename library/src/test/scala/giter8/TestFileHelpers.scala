@@ -18,10 +18,11 @@ object TestFileHelpers {
     else dir
   }
 
-  def touch(file: File): Unit = if (!file.exists) {
-    file.getParentFile.mkdirs()
-    file.createNewFile()
-  }
+  def touch(file: File): Unit =
+    if (!file.exists) {
+      file.getParentFile.mkdirs()
+      file.createNewFile()
+    }
 
   implicit class WriteableString(s: String) {
     def >>(file: File): Unit = {

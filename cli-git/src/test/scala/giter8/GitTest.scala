@@ -22,9 +22,10 @@ class GitTest extends AnyFlatSpec with Matchers with EitherValues with TryValues
     val git = new Git(interactorMock) {
       // Override because actual methods can corrupt your project directory
       override protected def cleanDir(dir: File): Unit = directoryWasCleaned = true
-      override protected def copy(from: File, to: File): Try[Unit] = Try {
-        directoryWasCopied = true
-      }
+      override protected def copy(from: File, to: File): Try[Unit] =
+        Try {
+          directoryWasCopied = true
+        }
     }
   }
 

@@ -121,9 +121,10 @@ class JGitInteractorTest extends AnyFlatSpec with Matchers with BeforeAndAfter w
 
     def commit(message: String): Unit = withRepository { git => git.commit.setAll(true).setMessage(message).call() }
 
-    def checkout(name: String, createBranch: Boolean = false): Unit = withRepository { git =>
-      git.checkout.setName(name).setCreateBranch(createBranch).call()
-    }
+    def checkout(name: String, createBranch: Boolean = false): Unit =
+      withRepository { git =>
+        git.checkout.setName(name).setCreateBranch(createBranch).call()
+      }
 
     def tag(name: String): Unit = withRepository { git => git.tag.setName(name).call() }
 

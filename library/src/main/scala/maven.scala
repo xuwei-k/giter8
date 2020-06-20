@@ -50,8 +50,8 @@ object Maven extends JavaTokenParsers with MavenHelper {
       .toRight(s"Found metadata at $loc but can't extract latest version")
   }
 
-  private[giter8] def findLatestStableVersion(loc: String, elem: NodeSeq)(
-      implicit svo: Ordering[VersionNumber]
+  private[giter8] def findLatestStableVersion(loc: String, elem: NodeSeq)(implicit
+      svo: Ordering[VersionNumber]
   ): VersionE = {
     val versions = (elem \ "result" \ "doc" \ "str").collect {
       case x if x.attribute("name").map(_.text) == Some("v") => x.text

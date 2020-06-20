@@ -60,15 +60,16 @@ object FormatSpecification extends Properties("Format") {
     Gen.listOfN(size, asciiChar).map(_.mkString)
   } filter { _.nonEmpty }
 
-  def conversion(inContent: String, ps: Map[String, String]): String = synchronized {
-    IO.withTemporaryDirectory { tempDir =>
-      val in  = tempDir / "in.txt"
-      val out = tempDir / "out.txt"
-      IO.write(in, inContent, IO.utf8)
-      G8(in, out, tempDir, ps)
-      val outContent = IO.read(out, IO.utf8)
-      // println(outContent)
-      outContent
+  def conversion(inContent: String, ps: Map[String, String]): String =
+    synchronized {
+      IO.withTemporaryDirectory { tempDir =>
+        val in  = tempDir / "in.txt"
+        val out = tempDir / "out.txt"
+        IO.write(in, inContent, IO.utf8)
+        G8(in, out, tempDir, ps)
+        val outContent = IO.read(out, IO.utf8)
+        // println(outContent)
+        outContent
+      }
     }
-  }
 }

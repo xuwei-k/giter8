@@ -330,7 +330,7 @@ object G8 {
   )(
       tmpl: File,
       workingDirectory: File,
-      arguments: Seq[String]  = Nil,
+      arguments: Seq[String] = Nil,
       forceOverwrite: Boolean = false,
       outputDirectory: Option[File]
   ): Either[String, String] =
@@ -371,7 +371,8 @@ object G8 {
   private def getVisibleFiles = getFiles(!_.isHidden) _
 
   /** transforms any maven() property operations to the latest
-    * version number reported by that service. */
+    * version number reported by that service.
+    */
   def transformProps(props: G8.OrderedProperties): Either[String, G8.OrderedProperties] =
     Maven.lookup(props)
 
@@ -536,8 +537,10 @@ object G8 {
 
     val scaffolds = if (sf.exists) Some(getFiles(_ => true)(sf)) else None
 
-    for (fs <- scaffolds;
-         f  <- fs if !f.isDirectory) {
+    for (
+      fs <- scaffolds;
+      f  <- fs if !f.isDirectory
+    ) {
       // Copy scaffolding recipes
       val realProjectRoot = getVisibleFiles(output)
         .filter(_.isDirectory)
@@ -594,22 +597,23 @@ class AugmentedStringRenderer {
     }
   }
 
-  def format(value: String, formatName: String): String = formatName match {
-    case "upper"    | "uppercase"       => value.toUpperCase
-    case "lower"    | "lowercase"       => value.toLowerCase
-    case "cap"      | "capitalize"      => value.capitalize
-    case "decap"    | "decapitalize"    => decapitalize(value)
-    case "start"    | "start-case"      => startCase(value)
-    case "word"     | "word-only"       => wordOnly(value)
-    case "space"    | "word-space"      => space(value)
-    case "Camel"    | "upper-camel"     => upperCamel(value)
-    case "camel"    | "lower-camel"     => lowerCamel(value)
-    case "hyphen"   | "hyphenate"       => hyphenate(value)
-    case "norm"     | "normalize"       => normalize(value)
-    case "snake"    | "snake-case"      => snakeCase(value)
-    case "package"  | "package-naming"  => packageNaming(value)
-    case "packaged" | "package-dir"     => packageDir(value)
-    case "random"   | "generate-random" => addRandomId(value)
-    case _ => value
-  }
+  def format(value: String, formatName: String): String =
+    formatName match {
+      case "upper"    | "uppercase"       => value.toUpperCase
+      case "lower"    | "lowercase"       => value.toLowerCase
+      case "cap"      | "capitalize"      => value.capitalize
+      case "decap"    | "decapitalize"    => decapitalize(value)
+      case "start"    | "start-case"      => startCase(value)
+      case "word"     | "word-only"       => wordOnly(value)
+      case "space"    | "word-space"      => space(value)
+      case "Camel"    | "upper-camel"     => upperCamel(value)
+      case "camel"    | "lower-camel"     => lowerCamel(value)
+      case "hyphen"   | "hyphenate"       => hyphenate(value)
+      case "norm"     | "normalize"       => normalize(value)
+      case "snake"    | "snake-case"      => snakeCase(value)
+      case "package"  | "package-naming"  => packageNaming(value)
+      case "packaged" | "package-dir"     => packageDir(value)
+      case "random"   | "generate-random" => addRandomId(value)
+      case _ => value
+    }
 }
