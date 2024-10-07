@@ -6,7 +6,7 @@ import java.io.File
 import sbt.io.IO
 
 object LauncherTest extends BasicTestSuite {
-  lazy val launcher = new Runner {
+  object MyLauncher extends Runner {
     def run(args: Array[String], workingDirectory: File): Int = {
       run(args, workingDirectory, new LauncherProcessor)
     }
@@ -17,7 +17,7 @@ object LauncherTest extends BasicTestSuite {
 
   test("runs scala/scala-seed.g8") {
     IO.withTemporaryDirectory { dir =>
-      launcher.run(Array("scala/scala-seed.g8", "--name=hello"), dir)
+      MyLauncher.run(Array("scala/scala-seed.g8", "--name=hello"), dir)
       assert((dir / "hello" / "build.sbt").exists)
     }
   }

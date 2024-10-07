@@ -32,6 +32,7 @@ object Dependencies {
   val scala213  = "2.13.15"
   val scala3    = "3.3.4"
   val sbt1      = "1.2.8"
+  val sbt2      = "2.0.0-M2"
   val scalaXml  = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
   def parserCombinator(scalaVersion: String) = "org.scala-lang.modules" %% "scala-parser-combinators" % {
     CrossVersion.partialVersion(scalaVersion) match {
@@ -40,6 +41,6 @@ object Dependencies {
     }
   }
   val logback      = "ch.qos.logback" % "logback-classic" % "1.2.3"
-  val coursier     = "io.get-coursier" %% "coursier" % "2.1.13"
+  val coursier     = "io.get-coursier" %% "coursier" % "2.1.13" cross CrossVersion.for3Use2_13
   val launcherIntf = "org.scala-sbt" % "launcher-interface" % "1.4.3"
 }

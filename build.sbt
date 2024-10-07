@@ -75,15 +75,13 @@ lazy val app = (project in file("app"))
   )
 
 lazy val crossSbt = Seq(
-  crossSbtVersions := List(sbt1),
-  scalaVersion := {
-    val crossSbtVersion = (pluginCrossBuild / sbtVersion).value
-    partialVersion(crossSbtVersion) match {
-      case Some((1, _)) => scala212
-      case _ =>
-        throw new Exception(s"unexpected sbt version: $crossSbtVersion (supported: 1.X)")
+  crossSbtVersions := List(sbt1, sbt2),
+  pluginCrossBuild / sbtVersion := {
+    scalaBinaryVersion.value match {
+      case "2.12" => sbt1
+      case _ => sbt2
     }
-  }
+  },
 )
 
 lazy val scaffold = (project in file("scaffold"))
@@ -94,7 +92,7 @@ lazy val scaffold = (project in file("scaffold"))
     name := "sbt-giter8-scaffold",
     description := "sbt plugin for scaffolding giter8 templates",
     sbtPlugin := true,
-    crossScalaVersions := List(scala212),
+    crossScalaVersions := List(scala212, scala3),
     scriptedLaunchOpts ++= javaVmArgs.filter(a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)),
     scriptedBufferLog := false,
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
@@ -114,7 +112,7 @@ lazy val plugin = (project in file("plugin"))
     name := "sbt-giter8",
     description := "sbt plugin for testing giter8 templates",
     sbtPlugin := true,
-    crossScalaVersions := List(scala212),
+    crossScalaVersions := List(scala212, scala3),
     scriptedLaunchOpts ++= javaVmArgs.filter(a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith)),
     scriptedBufferLog := false,
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),

@@ -13,19 +13,7 @@ jobs:
         include:
           - java: 8
             os: ubuntu-latest
-            name: test_all
-          - java: 8
-            os: ubuntu-latest
             name: scala_3
-          - java: 8
-            os: windows-latest
-            name: scala_2_13 # TODO enable scripted test
-          - java: 8
-            os: ubuntu-latest
-            name: scala_2_13
-          - java: 21
-            os: ubuntu-latest
-            name: test_all
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/setup-java@v4
@@ -53,7 +41,7 @@ jobs:
             sbt -v SetScala213 app/test lib/test
             ;;
           "scala_3")
-            sbt -v '++ 3.x' app/test lib/test
+            sbt -v '++ 3.x' publishLocal test scripted
             ;;
           *)
             echo "unknown job"
