@@ -54,7 +54,7 @@ lazy val root = (project in file("."))
   .aggregate(app, lib, scaffold, plugin, gitsupport, launcher)
   .settings(
     name := "giter8",
-    crossScalaVersions := Nil,
+    crossScalaVersions := List(scala212, scala213, scala3),
     siteGitHubRepo := "foundweekends/giter8",
     siteEmail := { "74864734+foundweekends-bot[bot]@users.noreply.github.com" },
     publish / skip := true,
@@ -79,9 +79,9 @@ lazy val crossSbt = Seq(
   pluginCrossBuild / sbtVersion := {
     scalaBinaryVersion.value match {
       case "2.12" => sbt1
-      case _ => sbt2
+      case _      => sbt2
     }
-  },
+  }
 )
 
 lazy val scaffold = (project in file("scaffold"))

@@ -13,7 +13,7 @@ jobs:
         include:
           - java: 8
             os: ubuntu-latest
-            name: scala_3
+            name: test_all
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/setup-java@v4
@@ -28,6 +28,7 @@ jobs:
           "test_all")
             sbt -v \
             -no-colors \
+            "++ 3.x" \
             publishLocal \
             scalafmtSbtCheck \
             "+ scalafmtCheckAll" \
