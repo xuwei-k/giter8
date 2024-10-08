@@ -39,15 +39,11 @@ jobs:
         case ${{ matrix.name }} in
           "test_all")
             sbt -v \
-            -no-colors \
             publishLocal \
             scalafmtSbtCheck \
             "+ scalafmtCheckAll" \
-            launcher/test \
-            plugin/scripted \
-            scaffold/scripted \
-            lib/test \
-            app/compile
+            test
+            scripted
             ;;
           "scala_2_13")
             sbt -v SetScala213 app/test lib/test
