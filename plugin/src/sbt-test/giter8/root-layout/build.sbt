@@ -1,1 +1,1 @@
-
+enablePlugins(Giter8Plugin)

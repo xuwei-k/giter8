@@ -4,3 +4,5 @@ val javaVmArgs: List[String] = {
 }
 
 scriptedLaunchOpts ++= javaVmArgs.filter(a => Seq("-Xmx", "-Xms", "-XX").exists(a.startsWith))
+
+enablePlugins(Giter8Plugin)
